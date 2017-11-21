@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
 
 namespace Tiler
 {
@@ -12,10 +13,37 @@ namespace Tiler
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        int tileWidth = 64;
+        int tileHeight = 64;
+
+        public enum TileType { Dirt, Grass, Ground, Mud, Road, Rock, Wood };
+
+        List<Texture2D> tileTextures = new List<Texture2D>();
+
+        int[,] tileMap = new int[,]
+   {
+        {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},
+        {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},
+        {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},
+        {2,2,2,2,2,2,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2},
+        {2,2,2,2,2,2,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2},
+        {2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2},
+        {2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2},
+        {2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2},
+        {2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2},
+        {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},
+        {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},
+        {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},
+
+   };
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            graphics.PreferredBackBufferWidth = tileWidth * tileMap.GetLength(1);
+            graphics.PreferredBackBufferHeight = tileHeight * tileMap.GetLength(0);
+            graphics.ApplyChanges();
+
         }
 
         /// <summary>
@@ -39,6 +67,15 @@ namespace Tiler
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            // assumes dirt is 0
+            Texture2D dirt = Content.Load<Texture2D>("Tiles/se_free_dirt_texture");
+            tileTextures.Add(dirt);
+
+            Texture2D grass = Content.Load<Texture2D>("Tiles/se_free_grass_texture");
+            tileTextures.Add(grass);
+
+            Texture2D ground = Content.Load<Texture2D>("Tiles/se_free_ground_texture");
+            tileTextures.Add(ground);
 
             // TODO: use this.Content to load your game content here
         }
@@ -74,7 +111,22 @@ namespace Tiler
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, null, null);
 
+            for (int x = 0; x < tileMap.GetLength(1) ; x++)
+                for (int y = 0; y < tileMap.GetLength(0); y++)
+                {
+                    int textureIndex = tileMap[y, x];
+                    Texture2D texture = tileTextures[textureIndex];
+                    // Draw surrounding tiles
+                        spriteBatch.Draw(texture,
+                            new Rectangle(x * tileWidth,
+                          y * tileHeight,
+                          tileWidth,
+                          tileHeight),
+                            Color.White);
+                }
+            spriteBatch.End();
             // TODO: Add your drawing code here
 
             base.Draw(gameTime);
